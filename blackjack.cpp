@@ -24,7 +24,7 @@ void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameStat
 void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet);
 void ShowHands(vector<Card> playerCards, vector<Card> dealerCards);
 void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet);
-void PlayAgain(GameState &state);
+void PlayAgain(GameState &state, double money);
 
 int main()
 {
@@ -47,22 +47,26 @@ int main()
       break;
 
     case GameState::Player:
+      // Check for blackjack
       playerTotal = CalculateTotal(playerCards);
-
       if (playerTotal == 21)
         state = GameState::Dealer;
 
-      if (playerTotal > 21)
-        state = GameState::Result;
-
+      // Player decision
       PlayerActions(playerCards, dealerCards, state, money, playerBet, insuranceBet);
       ShowHands(playerCards, dealerCards);
+
+      // Check for bust
       playerTotal = CalculateTotal(playerCards);
+      if (playerTotal > 21)
+        state = GameState::Result;
       break;
 
     case GameState::Dealer:
+      // Draw second card
       GetCard(dealerCards);
 
+      // Draw until over 16
       dealerTotal = CalculateTotal(dealerCards);
       while (dealerTotal < 16)
       {
@@ -76,9 +80,8 @@ int main()
 
     case GameState::Result:
       DetermineResult(playerTotal, dealerTotal, money, playerBet, insuranceBet);
-      PlayAgain(state);
+      PlayAgain(state, money);
       break;
-
     case GameState::End:
       break;
     }
@@ -163,7 +166,7 @@ void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameStat
 {
   // Output action options
   string availableActions = "[H]it\n[S]tand\n";
-  if (money >= playerBet)
+  if (money - playerBet >= playerBet)
     availableActions += "[D]ouble down\n";
   if (dealerCards[0].getValue() == 11 && insuranceBet == 0)
     availableActions += "[I]nsurance\n";
@@ -269,8 +272,15 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
   }
 }
 
-void PlayAgain(GameState &state)
+void PlayAgain(GameState &state, double money)
 {
+  if (money == 0)
+  {
+    cout << "You've run out of money. Thanks for playing!" << endl;
+    state = GameState::End;
+    return;
+  }
+
   char again;
   cout << "Play again? [Y]es or [N]o" << endl;
   cin >> again;
