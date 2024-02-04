@@ -278,11 +278,6 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
     cout << "Dealer bust" << endl;
     money += playerBet;
   }
-  else if (dealerTotal == 21 && insuranceBet > 0) // Check for dealer blackjack if insurance bet was made
-  {
-    cout << "Dealer has blackjack. Insurance pays 2:1." << endl;
-    money += insuranceBet * 2; // Insurance bet pays 2:1
-  }
   else if (playerTotal == dealerTotal)
     cout << "Push" << endl;
   else if (playerTotal == 21)
@@ -299,6 +294,21 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
   {
     cout << "You lose" << endl;
     money -= playerBet;
+  }
+
+  // Handle insurance payout
+  if (insuranceBet > 0)
+  {
+    if (dealerTotal == 21) // Insurance win
+    {
+      cout << "Dealer has blackjack. Insurance pays 2:1." << endl;
+      money += insuranceBet * 2; // Insurance bet pays 2:1
+    }
+    else // Insurance loss
+    {
+      cout << "Dealer did not have blackjack. Insurance loss -$" << insuranceBet << endl;
+      money -= insuranceBet;
+    }
   }
 }
 
