@@ -23,7 +23,7 @@ void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards);
 void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double playerBet, double insuranceBet);
 void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet);
 void ShowHands(vector<Card> playerCards, vector<Card> dealerCards);
-void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet);
+void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet, vector<Card> dealerCards);
 void PlayAgain(GameState &state, double money);
 
 int main()
@@ -82,7 +82,7 @@ int main()
       break;
 
     case GameState::Result:
-      DetermineResult(playerTotal, dealerTotal, money, playerBet, insuranceBet);
+      DetermineResult(playerTotal, dealerTotal, money, playerBet, insuranceBet, dealerCards);
       PlayAgain(state, money);
       break;
     case GameState::End:
@@ -136,6 +136,7 @@ void PlaceBet(double &playerBet, double &money)
   // Option to place the same bet as the previous hand
   if (playerBet != 0 && money >= playerBet)
   {
+    cout << "Previous bet $" << playerBet << endl;
     cout << "Place same bet? [Y]es or [N]o" << endl;
     char response;
     cin >> response;
@@ -145,7 +146,6 @@ void PlaceBet(double &playerBet, double &money)
     {
       cout << "Invalid response." << endl;
       cout << "Place same bet? [Y]es or [N]o" << endl;
-      char response;
       cin >> response;
       response = toupper(response);
     }
@@ -221,7 +221,6 @@ void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameStat
     break;
   case 'D': // Double Down
     GetCard(playerCards);
-    money -= playerBet;
     playerBet += playerBet;
     state = GameState::Dealer;
     break;
@@ -232,11 +231,11 @@ void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameStat
 
 void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet)
 {
-  cout << "Money available: $" << money << endl;
+  cout << "Money available: $" << money - playerBet << endl;
   cout << "Place your insurance bet. $";
   cin >> insuranceBet;
 
-  while (insuranceBet <= 0 || insuranceBet > money || insuranceBet > (playerBet / 2.0))
+  while (insuranceBet <= 0 || insuranceBet > money - playerBet || insuranceBet > (playerBet / 2.0))
   {
     if (insuranceBet == 0)
       cout << "Can't bet nothing" << endl;
@@ -244,7 +243,7 @@ void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet)
     if (insuranceBet < 0)
       cout << "Can't place a negative bet" << endl;
 
-    if (insuranceBet > money)
+    if (insuranceBet > money - playerBet)
       cout << "Can't bet more than you have" << endl;
 
     if (insuranceBet > (playerBet / 2.0))
@@ -266,7 +265,7 @@ void ShowHands(vector<Card> playerCards, vector<Card> dealerCards)
   cout << endl;
 }
 
-void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet)
+void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet, vector<Card> dealerCards)
 {
   if (playerTotal > 21)
   {
@@ -283,7 +282,7 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
   else if (playerTotal == 21)
   {
     cout << "BLACKJACK" << endl;
-    money += playerBet * 1.5;
+    money += playerBet * 1.5; // Blackjack pays 3:2
   }
   else if (playerTotal > dealerTotal)
   {
@@ -292,7 +291,10 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
   }
   else
   {
-    cout << "You lose" << endl;
+    if (dealerTotal == 21 && dealerCards.size() == 2)
+      cout << "Dealer blackjack" << endl;
+    else
+      cout << "You lose" << endl;
     money -= playerBet;
   }
 
