@@ -3,6 +3,7 @@
 #include <cstdlib> // Include <cstdlib> for rand()
 #include <vector>
 #include "Card.h"
+#include "ErrorHandler.h"
 using namespace std;
 
 enum class GameState
@@ -22,7 +23,7 @@ void PlaceBet(double &playerBet, double &money);
 void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards);
 void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double &playerBet, double insuranceBet);
 void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet);
-void ShowHands(vector<Card> playerCards, vector<Card> dealerCards);
+void ShowHands(vector<Card> &playerCards, vector<Card> &dealerCards);
 void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet, vector<Card> dealerCards);
 void PlayAgain(GameState &state, double money);
 
@@ -142,9 +143,18 @@ void PlaceBet(double &playerBet, double &money)
     cin >> response;
     response = toupper(response);
 
-    while (response != 'Y' && response != 'N')
+    while (cin.fail() || cin.peek() != '\n' || (response != 'Y' && response != 'N'))
     {
-      cout << "Invalid response." << endl;
+      if (cin.fail() || cin.peek() != '\n')
+      {
+        ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+        // Clear input buffer
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      }
+      else
+        ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+
       cout << "Place same bet? [Y]es or [N]o" << endl;
       cin >> response;
       response = toupper(response);
@@ -154,19 +164,28 @@ void PlaceBet(double &playerBet, double &money)
   }
 
   // Place a new bet
+  cout << "Money available: $" << money << endl;
   cout << "Place your bet. $";
   cin >> playerBet;
 
-  while (playerBet <= 0 || playerBet > money)
+  while (cin.fail() || playerBet <= 0 || playerBet > money)
   {
-    if (playerBet == 0)
-      cout << "Can't bet nothing" << endl;
+    if (cin.fail())
+    {
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+      // Clear input buffer
+      cin.clear();
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
 
-    if (playerBet < 0)
-      cout << "Can't place a negative bet" << endl;
+    else if (playerBet == 0)
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidBet, "Can't bet nothing");
 
-    if (playerBet > money)
-      cout << "Can't bet more than you have" << endl;
+    else if (playerBet < 0)
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::NegativeBet, "Can't place a negative bet");
+
+    else if (playerBet > money)
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InsufficientFunds, "Can't bet more than you have");
 
     cout << "Place a new bet. $";
     cin >> playerBet;
@@ -203,8 +222,18 @@ void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameStat
   action = toupper(action);
 
   // Validate input
-  while (action != 'H' && action != 'S' && action != 'D' && action != 'I')
+  while (cin.fail() || cin.peek() != '\n' || (action != 'H' && action != 'S' && action != 'D' && action != 'I'))
   {
+    if (cin.fail() || cin.peek() != '\n')
+    {
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+      // Clear input buffer
+      cin.clear();
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    else
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+
     cout << availableActions;
     cin >> action;
     action = toupper(action);
@@ -238,23 +267,23 @@ void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet)
   while (insuranceBet <= 0 || insuranceBet > money - playerBet || insuranceBet > (playerBet / 2.0))
   {
     if (insuranceBet == 0)
-      cout << "Can't bet nothing" << endl;
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidBet, "Can't bet nothing");
 
     if (insuranceBet < 0)
-      cout << "Can't place a negative bet" << endl;
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::NegativeBet, "Can't place a negative bet");
 
     if (insuranceBet > money - playerBet)
-      cout << "Can't bet more than you have" << endl;
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InsufficientFunds, "Can't bet more than you have");
 
     if (insuranceBet > (playerBet / 2.0))
-      cout << "Can't bet more than half of your current bet" << endl;
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidBet, "Can't bet more than half of your current bet");
 
     cout << "Place a new insurance bet. $";
     cin >> insuranceBet;
   }
 }
 
-void ShowHands(vector<Card> playerCards, vector<Card> dealerCards)
+void ShowHands(vector<Card> &playerCards, vector<Card> &dealerCards)
 {
   cout << endl;
   cout << "Dealer card" << ((dealerCards.size() > 1) ? "s" : "") << " (" << CalculateTotal(dealerCards) << ") : ";
@@ -328,11 +357,21 @@ void PlayAgain(GameState &state, double money)
   cin >> again;
   again = toupper(again);
 
-  while (again != 'Y' && again != 'N')
+  while (cin.fail() || cin.peek() != '\n' || (again != 'Y' && again != 'N'))
   {
-    cout << "Invalid entry." << endl;
+    if (cin.fail() || cin.peek() != '\n')
+    {
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+      // Clear input buffer
+      cin.clear();
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    else
+      ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
+    
     cout << "Play again? [Y]es or [N]o" << endl;
     cin >> again;
+    again = toupper(again);
   }
 
   if (again == 'Y')

@@ -1,16 +1,22 @@
+# Define compiler and flags
 CC = g++
-CFLAGS = -std=c++11
-TARGET = blackjack
-SRCS = blackjack.cpp Card.cpp
+CFLAGS = -Wall -Wextra -std=c++11
+
+# Define source files and object files
+SRCS = Blackjack.cpp Card.cpp ErrorHandler.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-all: $(TARGET)
+# Define target executable
+TARGET = blackjack
 
+# Rule to link object files into executable
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET)
+	$(CC) $(CFLAGS) $^ -o $@
 
-.cpp.o:
+# Rule to compile source files into object files
+%.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Clean rule
 clean:
 	rm -f $(OBJS) $(TARGET)
