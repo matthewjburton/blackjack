@@ -273,6 +273,11 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
     cout << "Bust" << endl;
     money -= playerBet;
   }
+  else if (dealerTotal > 21)
+  {
+    cout << "Dealer bust" << endl;
+    money += playerBet;
+  }
   else if (dealerTotal == 21 && insuranceBet > 0) // Check for dealer blackjack if insurance bet was made
   {
     cout << "Dealer has blackjack. Insurance pays 2:1." << endl;
