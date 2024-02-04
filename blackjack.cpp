@@ -29,7 +29,7 @@ void PlayAgain(GameState &state, double money);
 int main()
 {
   GameState state = GameState::Betting;
-  double playerBet, insuranceBet = 0;
+  double playerBet = 0, insuranceBet = 0;
   double money = 100.0;
   int playerTotal, dealerTotal;
   vector<Card> playerCards, dealerCards;
@@ -43,21 +43,24 @@ int main()
     case GameState::Betting:
       PlaceBet(playerBet, money);
       DealNewHand(playerCards, dealerCards);
-      state = GameState::Player;
-      break;
-
-    case GameState::Player:
       // Check for blackjack
       playerTotal = CalculateTotal(playerCards);
       if (playerTotal == 21)
         state = GameState::Dealer;
+      else
+        state = GameState::Player;
+      break;
 
+    case GameState::Player:
       // Player decision
       PlayerActions(playerCards, dealerCards, state, money, playerBet, insuranceBet);
       ShowHands(playerCards, dealerCards);
 
-      // Check for bust
+      // Check for blackjack or bust
       playerTotal = CalculateTotal(playerCards);
+      if (playerTotal == 21)
+        state = GameState::Dealer;
+
       if (playerTotal > 21)
         state = GameState::Result;
       break;
@@ -129,6 +132,28 @@ int CalculateTotal(const vector<Card> &cards)
 void PlaceBet(double &playerBet, double &money)
 {
   cout << "Money available: $" << money << endl;
+
+  // Option to place the same bet as the previous hand
+  if (playerBet != 0 && playerBet >= money)
+  {
+    cout << "Place same bet? [Y]es or [N]o" << endl;
+    char response;
+    cin >> response;
+    response = toupper(response);
+
+    while (response != 'Y' && response != 'N')
+    {
+      cout << "Invalid response." << endl;
+      cout << "Place same bet? [Y]es or [N]o" << endl;
+      char response;
+      cin >> response;
+      response = toupper(response);
+    }
+    if (response == 'Y')
+      return;
+  }
+
+  // Place a new bet
   cout << "Place your bet. $";
   cin >> playerBet;
 
