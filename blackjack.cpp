@@ -15,6 +15,9 @@ using namespace std;
 #define MAGENTA "\033[35m"
 #define CYAN    "\033[36m"
 
+#define BLACK "\033[30m"
+#define WHITEBG "\033[47m"
+
 enum class GameState
 {
   Betting,
@@ -141,13 +144,13 @@ int CalculateTotal(const vector<Card> &cards)
 
 void PlaceBet(double &playerBet, double &money)
 {
-  cout << "Money available: $" << money << endl;
+  cout << "Money available: $" << GREEN << money << RESET << endl;
 
   // Option to place the same bet as the previous hand
   if (playerBet != 0 && money >= playerBet)
   {
     cout << "Previous bet $" << playerBet << endl;
-    cout << "Place same bet? [Y]es or [N]o" << endl;
+    cout << "Place same bet? [" << BLUE << 'Y' << RESET << "]es or [" << BLUE << 'N' << RESET << "]o" << endl;
     char response;
     cin >> response;
     response = toupper(response);
@@ -164,14 +167,14 @@ void PlaceBet(double &playerBet, double &money)
       else
         ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
 
-      cout << "Place same bet? [Y]es or [N]o" << endl;
+      cout << "Place same bet? [" << BLUE << 'Y' << RESET << "]es or [" << BLUE << 'N' << RESET << "]o" << endl;
       cin >> response;
       response = toupper(response);
     }
     if (response == 'Y')
       return;
     else
-      cout << "Money available: $" << money << endl;
+      cout << "Money available: $" << GREEN << money << RESET << endl;
   }
 
   // Place a new bet
@@ -219,11 +222,11 @@ void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards)
 void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double &playerBet, double insuranceBet)
 {
   // Output action options
-  string availableActions = "[H]it\n[S]tand\n";
+  string availableActions = "[" + string(BLUE) + 'H' + string(RESET) + "]it" + "\n[" + string(BLUE) + 'S' + string(RESET) + "]tand\n";
   if (money - playerBet >= playerBet && playerCards.size() == 2)
-    availableActions += "[D]ouble down\n";
+    availableActions += "[" + string(BLUE) + 'D' + string(RESET) + "]ouble down\n";
   if (dealerCards[0].getValue() == 11 && insuranceBet == 0)
-    availableActions += "[I]nsurance\n";
+    availableActions += "[" + string(BLUE) + 'I' + string(RESET) + "]nsurance\n";
   cout << availableActions;
 
   // Store action input
@@ -308,32 +311,32 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
 {
   if (playerTotal > 21)
   {
-    cout << "Bust" << endl;
+    cout << RED << "Bust" << RESET << endl;
     money -= playerBet;
   }
   else if (dealerTotal > 21)
   {
-    cout << "Dealer bust" << endl;
+    cout << GREEN << "Dealer bust" << RESET << endl;
     money += playerBet;
   }
   else if (playerTotal == dealerTotal)
-    cout << "Push" << endl;
+    cout << YELLOW << "Push" << RESET << endl;
   else if (playerTotal == 21)
   {
-    cout << "BLACKJACK" << endl;
+    cout << GREEN << "BLACKJACK" << RESET << endl;
     money += playerBet * 1.5; // Blackjack pays 3:2
   }
   else if (playerTotal > dealerTotal)
   {
-    cout << "You win!" << endl;
+    cout << GREEN << "You win!" << RESET << endl;
     money += playerBet;
   }
   else
   {
     if (dealerTotal == 21 && dealerCards.size() == 2)
-      cout << "Dealer blackjack" << endl;
+      cout << RED << "Dealer blackjack" << RESET << endl;
     else
-      cout << "You lose" << endl;
+      cout << RED << "You lose" << RESET << endl;
     money -= playerBet;
   }
 
@@ -342,12 +345,12 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
   {
     if (dealerTotal == 21) // Insurance win
     {
-      cout << "Dealer has blackjack. Insurance pays 2:1." << endl;
+      cout << "Dealer has blackjack." << GREEN << "Insurance pays 2:1." << RESET << endl;
       money += insuranceBet * 2; // Insurance bet pays 2:1
     }
     else // Insurance loss
     {
-      cout << "Dealer did not have blackjack. Insurance loss -$" << insuranceBet << endl;
+      cout << "Dealer did not have blackjack." << RED << "Insurance loss -$" << insuranceBet << RESET << endl;
       money -= insuranceBet;
     }
   }
@@ -363,7 +366,7 @@ void PlayAgain(GameState &state, double money)
   }
 
   char again;
-  cout << "Play again? [Y]es or [N]o" << endl;
+  cout << "Play again? [" << BLUE << 'Y' << RESET << "]es or [" << BLUE << 'N' << RESET << "]o" << endl;
   cin >> again;
   again = toupper(again);
 
@@ -379,7 +382,7 @@ void PlayAgain(GameState &state, double money)
     else
       ErrorHandler::HandleError(ErrorHandler::ErrorType::InvalidResponse);
     
-    cout << "Play again? [Y]es or [N]o" << endl;
+    cout << "Play again? [" << BLUE << 'Y' << RESET << "]es or [" << BLUE << 'N' << RESET << "]o" << endl;
     cin >> again;
     again = toupper(again);
   }
