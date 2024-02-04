@@ -20,15 +20,16 @@ void PrintCards(const vector<Card> &cards);
 int CalculateTotal(const vector<Card> &cards);
 void PlaceBet(double &playerBet, double &money);
 void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards);
-void PlayerActions(vector<Card> &playerCards, GameState &state, double &money, double playerBet);
+void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double playerBet, double insuranceBet);
+void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet);
 void ShowHands(vector<Card> playerCards, vector<Card> dealerCards);
-void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet);
+void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet);
 void PlayAgain(GameState &state);
 
 int main()
 {
   GameState state = GameState::Betting;
-  double playerBet;
+  double playerBet, insuranceBet = 0;
   double money = 100.0;
   int playerTotal, dealerTotal;
   vector<Card> playerCards, dealerCards;
@@ -46,9 +47,6 @@ int main()
       break;
 
     case GameState::Player:
-      PlayerActions(playerCards, state, money, playerBet);
-      ShowHands(playerCards, dealerCards);
-
       playerTotal = CalculateTotal(playerCards);
 
       if (playerTotal == 21)
@@ -56,13 +54,16 @@ int main()
 
       if (playerTotal > 21)
         state = GameState::Result;
+
+      PlayerActions(playerCards, dealerCards, state, money, playerBet, insuranceBet);
+      ShowHands(playerCards, dealerCards);
+      playerTotal = CalculateTotal(playerCards);
       break;
 
     case GameState::Dealer:
       GetCard(dealerCards);
 
       dealerTotal = CalculateTotal(dealerCards);
-
       while (dealerTotal < 16)
       {
         GetCard(dealerCards);
@@ -74,7 +75,7 @@ int main()
       break;
 
     case GameState::Result:
-      DetermineResult(playerTotal, dealerTotal, money, playerBet);
+      DetermineResult(playerTotal, dealerTotal, money, playerBet, insuranceBet);
       PlayAgain(state);
       break;
 
@@ -158,12 +159,14 @@ void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards)
   ShowHands(playerCards, dealerCards);
 }
 
-void PlayerActions(vector<Card> &playerCards, GameState &state, double &money, double playerBet)
+void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double playerBet, double insuranceBet)
 {
   // Output action options
   string availableActions = "[H]it\n[S]tand\n";
   if (money >= playerBet)
     availableActions += "[D]ouble down\n";
+  if (dealerCards[0].getValue() == 11 && insuranceBet == 0)
+    availableActions += "[I]nsurance\n";
   cout << availableActions;
 
   // Store action input
@@ -172,7 +175,7 @@ void PlayerActions(vector<Card> &playerCards, GameState &state, double &money, d
   action = toupper(action);
 
   // Validate input
-  while (action != 'H' && action != 'S' && action != 'D')
+  while (action != 'H' && action != 'S' && action != 'D' && action != 'I')
   {
     cout << availableActions;
     cin >> action;
@@ -194,25 +197,58 @@ void PlayerActions(vector<Card> &playerCards, GameState &state, double &money, d
     playerBet += playerBet;
     state = GameState::Dealer;
     break;
+  case 'I': // Insurance
+    PlaceInsuranceBet(insuranceBet, money, playerBet);
+  }
+}
+
+void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet)
+{
+  cout << "Money available: $" << money << endl;
+  cout << "Place your insurance bet. $";
+  cin >> insuranceBet;
+
+  while (insuranceBet <= 0 || insuranceBet > money || insuranceBet > (playerBet / 2.0))
+  {
+    if (insuranceBet == 0)
+      cout << "Can't bet nothing" << endl;
+
+    if (insuranceBet < 0)
+      cout << "Can't place a negative bet" << endl;
+
+    if (insuranceBet > money)
+      cout << "Can't bet more than you have" << endl;
+
+    if (insuranceBet > (playerBet / 2.0))
+      cout << "Can't bet more than half of your current bet" << endl;
+
+    cout << "Place a new insurance bet. $";
+    cin >> insuranceBet;
   }
 }
 
 void ShowHands(vector<Card> playerCards, vector<Card> dealerCards)
 {
   cout << endl;
-  dealerCards.size() > 1 ? cout << "Dealer cards: " : cout << "Dealer card: ";
+  cout << "Dealer card" << ((dealerCards.size() > 1) ? "s" : "") << " (" << CalculateTotal(dealerCards) << ") : ";
   PrintCards(dealerCards);
 
-  cout << "Your cards: ";
+  cout << "Your cards (" << CalculateTotal(playerCards) << "): ";
   PrintCards(playerCards);
+  cout << endl;
 }
 
-void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet)
+void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet)
 {
   if (playerTotal > 21)
   {
     cout << "Bust" << endl;
     money -= playerBet;
+  }
+  else if (dealerTotal == 21 && insuranceBet > 0) // Check for dealer blackjack if insurance bet was made
+  {
+    cout << "Dealer has blackjack. Insurance pays 2:1." << endl;
+    money += insuranceBet * 2; // Insurance bet pays 2:1
   }
   else if (playerTotal == dealerTotal)
     cout << "Push" << endl;
