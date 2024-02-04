@@ -20,7 +20,7 @@ void PrintCards(const vector<Card> &cards);
 int CalculateTotal(const vector<Card> &cards);
 void PlaceBet(double &playerBet, double &money);
 void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards);
-void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double playerBet, double insuranceBet);
+void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double &playerBet, double insuranceBet);
 void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet);
 void ShowHands(vector<Card> playerCards, vector<Card> dealerCards);
 void DetermineResult(int playerTotal, int dealerTotal, double &money, double playerBet, double insuranceBet, vector<Card> dealerCards);
@@ -187,7 +187,7 @@ void DealNewHand(vector<Card> &playerCards, vector<Card> &dealerCards)
   ShowHands(playerCards, dealerCards);
 }
 
-void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double playerBet, double insuranceBet)
+void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameState &state, double &money, double &playerBet, double insuranceBet)
 {
   // Output action options
   string availableActions = "[H]it\n[S]tand\n";
