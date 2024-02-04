@@ -134,7 +134,7 @@ void PlaceBet(double &playerBet, double &money)
   cout << "Money available: $" << money << endl;
 
   // Option to place the same bet as the previous hand
-  if (playerBet != 0 && playerBet >= money)
+  if (playerBet != 0 && money >= playerBet)
   {
     cout << "Place same bet? [Y]es or [N]o" << endl;
     char response;
