@@ -161,10 +161,11 @@ void PlaceBet(double &playerBet, double &money)
     }
     if (response == 'Y')
       return;
+    else
+      cout << "Money available: $" << money << endl;
   }
 
   // Place a new bet
-  cout << "Money available: $" << money << endl;
   cout << "Place your bet. $";
   cin >> playerBet;
 
