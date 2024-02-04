@@ -299,7 +299,7 @@ void PlaceInsuranceBet(double &insuranceBet, double &money, double playerBet)
 void ShowHands(vector<Card> &playerCards, vector<Card> &dealerCards)
 {
   cout << endl;
-  cout << "Dealer card" << ((dealerCards.size() > 1) ? "s" : "") << " (" << CalculateTotal(dealerCards) << ") : ";
+  cout << "Dealer card" << ((dealerCards.size() > 1) ? "s" : "") << " (" << CalculateTotal(dealerCards) << "): ";
   PrintCards(dealerCards);
 
   cout << "Your cards (" << CalculateTotal(playerCards) << "): ";

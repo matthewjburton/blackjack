@@ -17,3 +17,12 @@ Use the following command to play:
 ```bash
 ./blackjack
 ```
+
+### Bugs
+
+After doubling down your previous bet amount is twice your initial bet
+
+### Potential Features
+
+ASCII card display
+Player option to split hand
