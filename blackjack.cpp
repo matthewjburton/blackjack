@@ -191,7 +191,7 @@ void PlayerActions(vector<Card> &playerCards, vector<Card> dealerCards, GameStat
 {
   // Output action options
   string availableActions = "[H]it\n[S]tand\n";
-  if (money - playerBet >= playerBet)
+  if (money - playerBet >= playerBet && playerCards.size() == 2)
     availableActions += "[D]ouble down\n";
   if (dealerCards[0].getValue() == 11 && insuranceBet == 0)
     availableActions += "[I]nsurance\n";
@@ -283,7 +283,7 @@ void DetermineResult(int playerTotal, int dealerTotal, double &money, double pla
   else if (playerTotal == 21)
   {
     cout << "BLACKJACK" << endl;
-    money += playerBet;
+    money += playerBet * 1.5;
   }
   else if (playerTotal > dealerTotal)
   {
