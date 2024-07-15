@@ -24,5 +24,5 @@ After doubling down your previous bet amount is twice your initial bet
 
 ### Potential Features
 
-ASCII card display
+ASCII card display  
 Player option to split hand
